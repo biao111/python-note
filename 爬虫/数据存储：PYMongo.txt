@@ -1,0 +1,46 @@
+数据存储：PYMongo
+1.安装pymongo库：pip install pymongo 
+2.导包
+2.创建一个mongo代理：
+    Myclient = pymongoClient("mongodb://虚拟机地址：27017")
+    虚拟机地址查询：命令：ifconfig  结果：enp0s3里inet 10.12.193.215 
+3.定义数据表：mydb = Myclient["imooc"]
+4.定义集合：mycollection = mydb["pymongo_test"]
+4.增删改查：
+    1.增：
+        1.增加一条数据：mycollection.insert_one({字典数据})
+        2.增加多条数据：
+            1.创建列表：mylist[多条字典数据]
+            2.mycollection.insert_many(mylist)
+            3.通过find方法，返回一个游标数据cursor.Cursor
+                result = mycollection.find()
+                for item in result:
+                 print(item)
+            4.正则表达式查找：mycollection.find("name":{$regx}:"^G")
+            for item in result:
+                 print(item)
+            #数据返回：<pymongo.results.InsertManyResult object at 0x0000026D242CEF08>
+            #在centos里查询Mongo数据：use [表] db.[集合].find()
+    2.改:
+        1.修改含有G的数据，改为name为jd:
+            mycollection.update_one({"name":{"$regex":"^g"}},{"$set":{"name":"jd"}})
+    3.删：
+        1.删除url为https://www.imooc.com的数据
+            mycollection.delete.one({"url":"https://www.imooc.com"})
+        2。删除多条记录：例：删除淘宝和qq
+            mycollection.delete_many({"url":{"$regex":"https?://www\.[tq]"}})
+
+###抛出超时异常解决方法：
+    1.错误提示连接超时，同学可以先检查一下网络是否正常，如果正常可进行以下修改
+        1、第一步是需要在虚拟机中对mongodb数据库进行修改配置的，打开mongo.conf文件进行修改即可。
+        2、修改完后需要保存并重启服务。mongodb的配置文件中的bind_ip 默认为127.0.0.1，默认只有本机可以连接。此时，需要将bind_ip配置为0.0.0.0，表示接受任何IP的连接）
+        3、重启动mongo服务：service mongod restart
+        4、永久开放27017端口：
+        firewall-cmd --zone=public --permanent --add-port=27017/tcp; firewall-cmd --reload
+        同学也可以连接本机中的数据库
+    2.同学如果没有 Mongo.conf可以在启动服务时绑定ip地址。
+        解决远程连接：
+        1.mongodb的配置文件中的bind_ip 默认为127.0.0.1，默认只有本机可以连接。 此时，需要将bind_ip配置为0.0.0.0，表示接受任何IP的连接。mongod --dbpath data/ --logpath log/mongo.log --port 27017 --bind_ip 0.0.0.0 --fork
+        2.防火墙阻止了27017端口。关闭防火墙的命令改为：systemctl stop firewalld
+        最后重启mongo服务。
+        如果没有解决：可以将代码中的IP地址改为127.0.0.1，使用用本地的MongoDB，没有区别。也就是mongod --dbpath data/ --logpath log/mongo.log --port 27017 --bind_ip 127.0.0.1 --fork

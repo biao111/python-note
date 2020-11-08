@@ -1,0 +1,319 @@
+Django框架
+1.什么是Django：web框架，内置电池，用于快速开发可靠、安全、可扩展的web应用
+2.帮助文档：https://docs.djangoproject.com
+3.模型：MVT模型（模型Model,视图View 模板Template）
+4.开发流程：
+    1.选择合适的版本
+    2.安装及配置
+    3.生成项目结构
+    4.内容开发
+    5.迭代、上线、维护
+5.搭建环境：
+    1.创建虚拟环境：
+        1.安装:pip install virtualenv 
+        2.安装pip install virtualenvwrapper-win（windows环境下）
+        3.配置环境：变量名：WORKON_HOME 变量值：环境路径（D:envs）
+        4.创建环境：
+            1.cd envs
+            2.pip install -i https://pypi.tuna.tsinghua.edu.cn/simple Django==1.11.18
+            3.mkvirtualenv django1.11
+        5.生成模板：django-admin startproject my_project(项目名称)
+        6.进入项目：cd my_project
+        7.启动服务器：python manage.py runserver
+        8.创建模块：python startapp accounts(模块名称)
+        9.用python创建要修改settings.py的57行，改为'DIRS': [os.path.join(BASE_DIR ,'templates')],
+6.Django项目结构
+    .
+    |-- my_project          #项目录
+    |  |-- __init.py        #包的入口文件
+    |  |--settings.py       #项目配置文件
+    |  |--urls.py           #url访问地址配置文件
+    |  |--wsgi.py           #uwsgi配置
+    |--db.sqlite3           #sqllite数据库
+    |--manage.py            #命令管理工具
+
+7.开发知识的补充：
+    1.什么是url：
+        1.url是统一资源定位符，对可以从互联网上得到的资源的位置和访问方法的一种简洁表示，是互联网标准资源的地址
+        2.互联网上的每一个文件都有唯一的url
+        3.url协议：
+            1.http--超文本传输协议资源
+            2.https--用安全套接字层传送的超文本传输协议
+            3.ftp--文件传输协议
+        4.常见的http请求方式：
+            1.get
+                1.可以用浏览器直接访问
+                2.请求可以携带参数，但是有长度限制
+                3.请求参数直接放在url后面
+            2.poost
+                1.不能使用浏览器直接访问
+                2.对请求参数的长度没有限制
+                3.可以用来上传文件等需求
+        5.常见的http常见的状态码：
+            1.2xx 请求成功
+            2.3xx 重定向
+            3.4xx 请求错误
+            4.5xx 服务器错误
+        6.url配置及其参数传递：
+            /index ---》 View
+        7.url的匹配规则：
+            1.完整匹配
+                ^index/$
+                http://example.com/index/
+            2.正则匹配：     
+                ^article/([0-9]{4})/$
+                http://example.com/article/2018
+                http://example.com/article/2019
+            url的匹配规则：
+                ^article/(?P<year>[0-9]{4})/(?<month>[0-9]{2})/(?p[0-9]{2})/$
+                http://example.com/article2018/12/21/
+                http://example.com/article2019/01/02/
+        8.url的嵌套：
+            1.分模块设计url：
+                |-- my_project          #项目录
+                |  |--...
+                |  |--urls.py           #根目录下的url
+                |--app1                 #模块1
+                |  |--urls.py           #模块1url
+                |--app2                 #模块2
+                |  |--urls.py           #模块2url
+                |--app3                 #模块3
+                |  |--urls.py           #模块3url
+            2.根目录下的url：
+                url(r'^article/2018/$',views.airticle)
+            3.使用incle包含其他模块的url
+                url(r'^api/oauth/',include('oauth.urls'))
+            3.设计优雅的url
+                1.使用 简洁的url
+                2.给url指定明明空间namespace
+                3.给url指定命名那么
+            4.使用简洁的url
+                举例：http://example.com/ariticle/?year=2018&month=12&day=21
+                优化：http://example.com/ariticle/2018/12/21
+            5.使用命名空间：
+                举例：两种不同的角色访问不同的url，但是结果相同
+                使用namespace指定命名空间
+            6.使用命名空间：
+                from django..conf.urls import include,url
+
+                urlpatterns = [
+                    url(r'^author-polls/',
+                         include('polls.urls',namespace='author-polls')),
+                    url(r'^publisher-polls/',
+                         include('polls.urls',namespace='publisher-polls')),
+                ]
+            7.给url指定命名：
+                1.使用name指定的url的名称
+                    url(r'^airticle/2018$',views.ariticle, name= 'airticle_detail')
+                2.reverse逆向解析url
+                    reverse('airticle_detall')
+                    reverse('author-polls:index')
+                    reverse('polls:index',
+                    current_app=self.request.resolver_match.namespace)
+        9.视图：
+            1.什么是视图：一个函数，是一个简单朋友染红简单函数
+            2.接受请求，返回一个响应
+            3.响应可以是html内容、文本、图像、甚至404、重定向
+            4.视图快捷方法
+                1.定义视图：def vieew_name()
+                2.视图中获取url参数
+                    1.正则获取url中的参数
+                    2.获取url中的请求（GET/POST等）参数
+                        输入url：
+                            http://127.0.0.1.8000/index/?year=2019
+                        视图编导：
+                        def index(request):
+                            year = request.GET.get('year',None)
+                    3.返回html信息
+                        1.通过文件读取方式返回（原始），例：
+                            def now_use_file(request):
+                                '''从html文件读取内容，并相应'''
+                                html = ''
+                                file_name = os.path.join(settings.BASE_DIR,'templates','index.html')
+                                with open(file_name) as f:
+                                    html = f.read()
+                                html = html.replace('{{now}}',now.strftime('%Y-%m-%d'))
+                                return HttpResponse(html)
+                        2.使用loader.get_template读取
+                            #html = loader.get_template('index.html')
+                            #return HttpResponse(html.template.source)
+                            #将参数传入
+                            templ = loader.get_template('index.html')
+                            html = templ.render({
+                                #将参数替换掉
+                                'now':now
+                            })
+                            return HttpResponse(html)
+                        3.直接使用render
+                            #使用render函数
+                            return render(request,'index.html',{
+                                'now': now
+                            })
+                            4.使用render_to_response函数
+                                return render_to_response('index.html',{
+                                    'now':now
+                                })
+                3.重定向：
+                    1.思路：
+                        1.在urls.py里，给url定义name，例：url(r'^index/one/$',views.index_one,name="index_one"),
+                        2.在views.py里，定义url
+                        3.用reverse解析 url
+                        4.返回重定向
+                    2.HttpResponseRedirect方法例题例题：
+                    def index_one(request):
+                        url = reverse('index_two')
+                        return HttpResponseRedirect(url)
+                    3.redirect方法（推荐）：
+                    #可以省去其他的，直接在方法里写name
+                    return redirect("index_two")
+            5.内置的视图及重写
+                1.内置的错误处理视图
+                    1.400 Bad Request
+                    2.403 Forbidden
+                    3.404 Not Found
+                    4.500 Internal Server Error
+                2.在项目urls.py中添加配置
+                    例子：
+                    在urls.py页面，handler500 = "test_django.views.page_500"
+                    在views.py页面，
+                    def page_500(request):
+                        ''' 重写500响应'''
+                        return HttpResponse('服务器正忙')
+                3.static.serve处理静态文件
+                    1.在项目settings.py中添加配置 
+                    #用户上传的文件目录
+                    MEDIA_URL = '/medias/'
+                    MEDIA_ROOT = os.path.join(BASE_DIR,'medias')
+                    2.在项目urls.py中添加配置
+                    from django.views.static import serve
+                    urlpatterns += [
+                        url(r'^media/(?P<path>.*)$',serve,{
+                            'document_root':settings.MEDIA_ROOT,
+                        })
+                    ]
+                    补充：
+                    1、serve：static中的serve是django内置的一个视图函数，该位置是为了配置用户上传的静态文件，可以使用该url在浏览器中访问上传文件
+                    2、{'document_root': settings.MEDIA_ROOT}：关键字参数可以作为一个字典传递给目标视图，该视图函数的document_root=None要求以关键字的方式传入参数。因此使用{'document_root': settings.MEDIA_ROOT}。
+            6.请求响应对象
+                1.请求对象HttpRequest
+                    1.请求方式：method(POST/GET/)
+                    2.请求头信息META
+                    REMOTE_ADDR--请求的ip地址
+                    HTTP-USER-AGENT--用户请求终端信息
+                    3.获取请求传递的参数
+                        GET-GET请求参数
+                        POST-POST请求参数
+                        COOKLES-cookie信息
+                        FILES-文件信息
+                    4.实例：
+                    def print_request(request):
+                        print(request)
+                        print("--------------")
+                        #获取用户的ip
+                        ip = request.META['REMOTE_ADDR']
+                        print(ip)
+                        print("--------------")
+                        #获取用户的浏览器，终端信息
+                        user_agent = request.META['HTTP_USER_AGENT']
+                        print(user_agent)
+                        print("--------------")
+                        print(dir(request))
+                        return  HttpResponse()
+                2.响应对象HttpResponse:
+                    1.响应对象：
+                        1.HttpResponse
+                        2.HttpResponseRedirect
+                        3.JsonResponse--响应json
+                    2.常见的Context-Type
+                        1.test/html--超文本标记语言
+                        2.text/xml--普通文本
+                        3.text/xml--xml文档
+                        4.image/png image/jpeg image/gif--图形或者图片
+                        5.application/json--json数据类型
+                    3.实例：
+                        def print_response(request):
+                            '''响应对象学习'''
+                            now = datetime.now()
+                            templ = loader.get_template('index.html')
+                            html = templ.render({
+                                #将参数替换掉
+                                'now':now
+                            })
+                            return HttpResponse(html,content_type="text/plain")
+                    4.status查看HTTP响应状态码:类上的属性
+                        return HttpResponse("打印响应对象",status=404)
+                    5.status_code查看HTTP响应状态码：成员上的属性
+                    #实例变更，重新设置http的状态码
+                        resp.status_code = 204
+                    6.content_type设置相应的类型
+                    7.write()写入相应内容：
+                        resp =  HttpResponse("打印响应对象")
+                        resp.write("2020")
+                3.响应对象json
+                    1.实例：
+                        def print_json(request):
+                            '''响应json对象 '''
+                            user_info ={
+                                'username':'张三',
+                                'age':13
+                            }
+                            #python对象与json对象转换
+                            import json
+                            user_info = json.dumps(user_info, ensure_ascii=False)
+                            return HttpResponse(user_info,content_type='application/json') 
+                        或者：
+                            from django.http import JsonResponse
+                            return JsonResponse(user_info,json_dumps_params={'ensure_ascii':False})
+                    2.问题：将数据序列化后作为response返回，呈现中文乱码。
+                      解决：序列化采用json包，加入参数。如： return HttpResponse(json.dumps(res_dict, ensure_ascii=False))
+                      不去使用jsonresponse序列化。       
+                4.FileRseponse
+                    def print_images(request):
+                        '''打印图片'''
+                        from django.http import FileResponse
+                        try:
+                            file_name = os.path.join(settings.BASE_DIR,'medias/images/cat.jpg')
+                            f = open(file_name,'rb')
+                        except Exception as e:
+                            print(e)
+                        return FileResponse(f,content_type="image/jpg")
+
+
+                    def print_excel(request):
+                        '''打印excel'''
+                        from django.http import FileResponse
+                        try:
+                            file_name = os.path.join(settings.BASE_DIR,'medias/excel/test.xls')
+                            f = open(file_name,'rb')
+                        except Exception as e:
+                            print(e)
+                        return FileResponse(f,content_type="application/vnd.ms-excel")
+            7.使用class重写视图
+                1.视图是一个可调用的对象，可以接收一个请求然后返回一个响应
+                2.基于类的视图可以结构化你的视图
+                3.基于类的视图可以利用继承和混合从用代码
+                4.内置视图可以拿来即用，代码简洁
+                5.TemplateView
+                    1.继承视图
+                    django.views.generic.TemplateView
+                    2.配置模板地址
+                    class ShowClassView(TemplateView):
+                    '''用class重写视图'''
+                    template_name = 'show_class.html'
+                    3.配置url
+                    url(r'^show.class/$',views.ShowClassView.as_view(),name="show_class"),
+                    4.原理分析：
+                        1.从项目的目录寻找模板文件
+                        2.从app的模板目录寻找模板文件
+                    5.不在主路径下配置，例如在oauth模块下
+                        1.将url和class移到oauth模块下
+                        2.在settings.py文件下修改加入配置，INSTALLED_APPS = ['oauth.apps.OauthConfig',]
+                        3.确保settings.py中的，TEMPLATES = ['APP_DIRS':Ture]
+                    6.好处：
+                        1.在模块下的templates以便维护
+                        2.可以放心的变更
+                6.Django内置通用视图：
+                    1.django.views.generic.ListView
+                    列表数据的封装，如商品列表支持分页
+                    2.django.views.generic.DetilView
+                    详情类数据的封装，如商品详情

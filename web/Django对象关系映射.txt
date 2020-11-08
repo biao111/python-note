@@ -1,0 +1,297 @@
+Django对象关系映射（Object Relational Mpping）
+1.重要性：
+    1.面向对象的编程思想，方便扩充
+    2.少写sql或者不写sql，提高开发效率
+    3.支持多种类型的数据库，方便切换
+    4.ORM技术成熟，能解决绝大部分问题
+2.章节概要：
+    1.模型介绍
+    2.常见类型
+    3.模型的元数据
+    4.外键关联类型、复合类型
+    5.分析定义模型
+    6.模型同步migrate等
+    7.使用ORM实现CRUD
+    8.条件查询及分页
+    9.事务
+    10.聚合统计
+    11.自定义查询
+    12.代理和自定义管理器
+    13.调试及查询优化调优
+    14：实战电商模型
+3.模型介绍及配置：
+    1.Django ORM支持的数据库
+        1.Mysql
+        2.sqlite
+        3.PostgreSQL
+        4.oracle
+    2.配置示例：
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            }
+        }
+        1.default:默认的数据库，可配置多个数据，使用名称来区别
+        2.ENGINE：数据库引擎
+            'django.db.backends.postgresql'
+            'django.db.backends.mysql'
+            'django.db.backends.sqlite3'
+            'django.db.backends.oracle'
+        3.NAME:数据库名称
+        4.USER:大户句酷登录用户
+        5. PASSWORDD:数据库登陆密码
+        6.HOST:数据库访问地址
+        7.POST:数据库访问端口
+    3.sqlite3的配置选项：
+        只需要指定的数据库引擎和数据库文件名即可
+4.常见类型选项：
+    1.null、blank：是否为Null、空值
+    2.db_colum:数据库表中对应的字段名称
+    3.default：不填写改写字段值的默认值
+    4.primary_key、unique：主键、唯一索引
+    5.verbose_name：供编程查看的字段名称（便于阅读）
+    6.help_text:帮助文字
+    7.choices：可供选择的选项，如：性别的选项（男，女）
+    8.get_FOO_display():展示choices对应的值
+5.Django中常见的类型：
+    1.CharField,TextField:字符串、文本
+        1.max_length:组大长度
+        2.相关类型：
+            1.EmailField:邮件输入
+            2.URLField:url输入
+            3.TextField:长文本输入
+            4.FilePathField:文件路径的输入
+    2.DateField,DatetiomeField:日期时间
+    DatetiomeField:
+        1.auto_now:更新时间为记录更改的时间
+        2.auto_now_add:记录创建的时间
+    3.FileField,Image文件、图片
+    4.IntegerField,SmallIntegerField:整数
+    5.FloatField,DecimalField:小数
+6.模型同步步骤：
+    前提：
+        1.模型配置在settings.py中的INSTALLED_APPS
+        2.数据库已经创建，服务并且开启
+        3.检查模型是否有问题，python manage.py check
+    1.使用makemigrations生成同步原话：python manage.py makemigrations
+    2.使用migrate执行同步：pyyhon manage.py migrate
+7.模型的元数据
+    1.描述：使用Meta类来表示
+    2.对模型的补充说明
+    3.示例：
+        #内部类
+        class Meta:
+            verbose_name = '用户基础信息'
+            verbose_name_plural = '用户基础信息'
+            db_table = 'oauth_user'
+    4.类型
+        1.db_table:模型映射的数据库表名
+        2.ordering：指定数据表的默认排序规则
+        3.verbose_name:供编程查看的字段名称（便于阅读）
+        4.abstract:抽象类（抽象类不会生成数据表）
+        5.proxy：代理模型（对父模型的功能进行扩充）
+8.外键关联型、复合类型
+    1.关系类型：
+        1.OneToOneField:表示一对一关系
+        2.ForeignKey:表示一对多关系
+        3.ManyToManyField:多对多关系
+        4.ContentType:模型类型（复合类型）
+        5.ForeignKey(ContentType):关联符合模型
+        6.GenericForeignKey:关联模型：找到对应商品的id
+        7.GenericRelation反向关联
+9.分析定义模型
+10.使用ORM实现crud操作
+    1.使用模型的save()保存数据,使用Django Console操作
+        user_obj = User(
+            username = 'admin',
+            password = 'password'
+        )
+        user_obj.save()
+    2.使用模型的create()新增数据,使用Django Console操作
+        user_obj = User.objects.create(username='admin',
+            password='password')
+        user_obj.pk
+        1
+    3.通过cmd进入：
+        1.workon django1.11，先进入django环境
+        2.进入项目路径
+        3.python manage.py shell
+        4.在进行如上操作
+    4.使用ORM查询数据
+        1.使用get()查询单条数据,get()只能返回唯一存在的值
+            User.objects.get(pk=1)
+        2.使用all()查询所有的数据
+            User.objects.all()
+            for user in list_all:
+                print(user.username)
+    5.使用ORM修改数据
+        1.使用save()修改单条数据
+        2.使用模型的update()批量修改数据,使用该方法请先备份数据，一遍操作失误，无法逆转
+            user_obj = User.objects.all().upadate(*args,**kwargs)
+    6.使用ORM删除数据
+        1.使用模型的delete()删除数据
+            1.删除单条数据：
+            user_obj = User.objects.get(pk=1)
+            user_obj.delete()
+            2.删除多条数据,请先备份数据
+                User.objets.all().delete()
+        2.逻辑删除：将数据标记删除，删除后还占磁盘空间，删除后可恢复，删除后通过查询条件不展示给用户
+        3.物理删除：把数据彻底删除
+11.条件查询及分页
+    1.结果集QuerySet：
+        1.表示从数据库中取出来的对象集合
+        2.它可以是含有零个、一个或者多个过滤器（filter）
+        3.从模型的Manager哪里取得QuerySet
+        4.QuerySet的筛选结果本身还是QuerySet，可以用filter实现链式操作
+        5.QuerySet是惰性的
+    2.QuerySet常用方法：
+        1.get():返回一条记录
+        2.create():创建/新增一条数据库记录
+        3.get_or_create():有则返回，没有则创建记录
+        4.buik_crate([user1,user2,user3])：创建/新增多条数据库记录
+        5.first/last():返回第一条/最后一条记录
+        7.count()：返回记录行数 之和
+        8.exisits():结果集是否存在（是否存在一条以上的记录）
+        9.update():修改数据
+        10.delete():物理删除记录
+    3.QuerySet()链式插叙的方法：
+        1.filter():筛选出满足条件的多条记录
+        2.exclude():排除满足条件的多条记录
+        3.order_by():对查询的记录排序
+        4.all():查询所有记录
+        5.none():创建一个空的结果集
+        6.using():使用指定数据库查询（多数据库支持）
+    4.分页处理：减少用户等待时间，提升用户体验时间
+        方式一：对查询结果集QuerySet进行分片
+            例：返回前n个对象（LIMIT  5）
+                User.objects.all()[:5]
+            例：返回第六条到第十个对象(OFFSET 5 LIMIT 5)#OFFSET偏移
+                User,objects.all()[5:10]
+        方式二：使用django.core.paginator进行分页处理
+            1.Paginator:分页器
+            2.Page：某一页对象
+            异常：
+                InvalidPage:无效的页码
+                PageNotAnInteger:页码必须是整数
+                EmptyPage：空页（没有数据）
+            步骤一：取得分页器Paginator(objects,page_size)
+                1.objects:要进行分页数据
+                2.page_size:煤业的数据多少
+                p = Pageinator(objects,2)
+                3.分页器的属性：
+                    1.count:数据记录的总条数
+                    2.num_pages:总页数（总记录条数 /每页大小）
+                    3.page_rang:页码范围
+            步骤二：取得页面实例page = p.page(page_num)
+                1.psgr_num:当前的页码，如第几页
+                    p = Paginator(objects,2)
+                    page = p.page(3)
+                2.页码实例的属性：
+                    1.number：当前页的页码
+                    2.object_list:当前页的数据列表
+                    3.panginator:分页器对象的引用
+                3.页面实例的常用方法：
+                    1.has_next():是否还有下一页
+                    2.has_previous():是否还有上一页
+                    3.has_other_pages():是否还有其他页（上/下）
+                    4.next_page_number():下一页的页码，如果没有，触发InvalidPage异常
+                    5.previous_page_number():上一页的页码，如果没有，触发Invalidpage异常
+                4.实现ORM模型方法重写：
+                    class WeiboUser(models.Model):
+                        '''微博用户'''
+                            ...
+                        def __str__(self):
+                            return 'User:{0},Nickname:{1}'.format(self.username,self.nickname)
+    5.查询条件：
+        1.查询语法：
+            字段名称__查询条件 = "查询内容"     #注意是shuangxiahuaxian
+            1.相等/等于
+                1.exact:等于**值（默认的形式）
+                如：id__exact=6 或者 id = 6
+                2.iexact:像**值 数据库的like关键字
+            2.是否包含**字符串
+                1.conttains:包含**值
+                如：name__contains = 'san'
+                2.icontains:包含**值，不区分大小写
+                如：name_contains = 'san'   #Zhangdan zhangsan都满足条件
+            3.以**开始：
+                1.startswith,istartswith
+            4.以**结束
+                1.endswith.iendswith
+            5.在**选项（列表）之类
+                in
+            6.大于某一个值
+                gt 
+            7.大于等于某一个值
+                gte 
+            8.小于某一个值
+                lt 
+            9.小于或者等于某一一个值
+                lte 
+            10.是否为空值
+                isnull
+            11.时间
+                注意：django和数据库使用的时区不一样，将setting.py，改为USE_TZ = False
+            12.外键关联查询
+12.事务
+    1.多个数据库逻辑操作的集合
+    2.需要事务控制场景：
+        1.对多个ORM模型操作时
+        2.对结果要求严格一致（成功or失败）
+    3.在django使用事务
+        1.自动提交
+        from django.db import transaction
+
+        @transaction.atomic
+        def viewfunc(request):
+            #事务代码
+            do_stuff()
+            1.atomic自动提交过程解析
+                1.进入到外层的atomic代码块时会打开一个事务
+                2.进入到内层atomic代码块会创建一个标记
+                3.推出内部块时会释放或者回滚至标记
+                4.推出外部快时提交或回退事务
+        2.手动提交和回滚
+        from django.db import transaction
+
+        try:
+            a.save()
+            b.save()
+            transactionn.commit()   #提交事务
+        except:
+            transaction.rollback()  #回滚
+13.聚合统计
+    1.聚合函数位于django.models
+        1.Sun：求和
+        2.Avg：求平均数
+        3.Count：计数
+        4.Max/Min：最大值/最小值
+    2.方式
+        1.  aggregate：使用aggregate从整个查询结果集生成统计数据
+            from django.db.models import Avg
+            Book.objects.all().aggregate(Avg('price'))
+        2.annotate:为查询结果集中的每一项生成统计数据
+            from django.db import Count
+            q = Book.objects.annotate(Count('authors'))
+            q[0]
+            <Book:the Definitive Guide to Django>
+            q[0].authors_coun
+14.自定义查询
+    1.Q()函数的使用
+        2.使用Q（）还是你的胡实现复杂的查询
+        2.Q()函数支持&（且）和|（或），对应Sql中的AND和OR
+    2.F()函数的使用
+        1.F()函数从数据库层面修改数据
+        2.F()函数可避免同时操作时竟态条件
+    3.使用sql查询
+        1.使用管理器的raw(sql)函数
+        raw(raw_query,params=None,translations=None)
+        2.获取数据库连接、游标、直接执行sql
+            1.获取数据库连接
+            from  django.db. import connection
+            2.从连接得到游标
+            corsor = connection.corsor()
+            3.执行sql
+            cursor.excute()
+            row = cursor.feetchone()

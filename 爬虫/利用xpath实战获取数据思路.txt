@@ -1,0 +1,20 @@
+利用xpath实战获取数据思路
+1.导包
+2.创建url
+3.通过浏览器获取header
+4.用get方法获取html（如果存在乱码要respsonse.encoding='hdk'）
+5.定义一个变量，利用lxml的etree方法获取网站html
+    例：html_51job = etree.HTML(response.text)
+6.定义一个变量，通过xpath语句获取目标的根节点
+7.定义一个空的列表，列表将存放获取的所有信息
+8.遍历获取根节点的变量。例子：
+    for item in all_div:
+        info = {}
+        #这个.非常的重要，代表我们使用的是item下的xpath语句,不要把.丢了
+        #获取数据的时候，要使用列表索引为0的数据
+        info['job_name'] = item.xpath("./p/span/a/@title")[0]
+        info['company_name'] = item.xpath(".//span[@class='t2']/a/@title")[0]
+        #追加存放获取数据的空列表：info_list.append(info)
+9.用json格式获取追加后存放数据的列表信息
+10.将json数据粘贴到www.json.cn里进行解析和格式化校验
+11.完毕

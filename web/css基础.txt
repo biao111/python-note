@@ -1,0 +1,16 @@
+css基础
+1.css样式文件结构
+    1.样式选择器
+        1.标签选择器：理解其效果
+            例：p{
+                background-color:red;
+                font-size:20px;
+            }
+            #p：样式选择器 background：属性 red:属性值  冒号：分隔符
+2.内部样式：
+    1.样式选择器和html在同一个界面
+        <style type="text/css">
+            p{
+                background-color:red;
+                font-size:20px;
+            }

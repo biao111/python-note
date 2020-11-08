@@ -1,0 +1,16 @@
+lxml模块
+目的：
+    1.利用Xpath语法，来快速定位元素以及节点的位置
+    2.提取HTML，xml目标数据
+方法：
+    1.导入lxml库，调用etree包
+    2.导入不完整的HTML数据
+    3.使用etree.HTML,将不完整的数据传进来：html=etree,HTML(html_data)
+    4.使用etree.tostring转成文本字符串，类型二进制，进行decode解码
+        etree.tostring(html).decode()
+    5.type(html):返回的是_Element，就是整个xml树根节点
+    6.获取li标签：html.xpath("//li")    #返回的是列表
+    7.获取class属性：html.xpath("//li/@class")
+    8.获取li下的a标签：html.xpath("//li/a[@href='link1.html']")     #[]内外必是双引号|单引号其一，不可同时
+    9.获取li下非直接子节点：html.xpath("//li//span")    #使用双斜杠
+    10.获取li最后一个标签：html.xpath("//li[last()]/a/@href")   #使用last函数

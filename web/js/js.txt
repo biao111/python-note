@@ -1,0 +1,25 @@
+js
+1.页面使用js的方法
+    1.使用<script>在html页面插入JavaScript
+    2.外部引用js文件
+2.测试方法
+    1.弹窗检测：alert();
+    2.控制台检测：console.log（）；
+3.自定义函数：
+    1.先使用后定义 ：
+    functionn fun1(){   //fun1函数名
+        代码段
+        return ***;
+    }
+    2.函数表达式，先定义再使用
+    var fun1 = functionn(x){    //形参内不应加var
+        return;
+    }
+4.数据类型：
+    1.number:数字类型，整型浮点型 都包括
+    2.string：字符串类型，
+    3.boolean：布尔类型，必须放在单引号或者双引号中
+    4.undefined：未定义，一般指的是已经声明，但不影响赋值的变量
+    5.null：空的对象，var=null,区别var=""
+    6.object：对象类型，在js常见的有window，documentarray
+    7.NaN：是number的一种特殊类型，isNaN()，如果是数字返回的flase,不是数字返回ture

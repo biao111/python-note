@@ -1,0 +1,170 @@
+Django模板语法
+1.templates介绍和选择
+    1.模板和模板引擎
+        1.模板具有一定的格式或骨架，可以动态的生成html
+        2.模板引擎决定以何种方式组织代码
+        3.一个项目可以有一个或者多个模板引擎
+            1.DTL介绍
+                1.DTL（Django Template language）是django原生的模板引擎
+                2.直到Django1.8，唯一的模板引擎支持
+            2.Jinja2介绍：
+                1.速度更快，python的功能齐全的开源模板引擎
+                2.更完善的文档
+                3.安装pip install jinja2
+    2.渲染机制：
+        步骤1.从磁盘读取模板文件（get_template）
+        步骤2.选择合适的模板引擎（select_template）
+        步骤3.将 定制的内容对模板进行渲染（render）
+        步骤4.发送给浏览器显示
+2.templates相关配置
+    1.配置实例
+        TEMPLATES = [
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',#模板引擎的配置，默认的模板
+                'DIRS': [os.path.join(BASE_DIR ,'templates')],#在目录里寻找模板，可配置多个
+                'APP_DIRS': True,#从各自模块寻找
+                'OPTIONS': {
+                   # 其他选项配置
+                },
+            },
+        ]
+    2.配置的选项：
+        1.BACKEND-模板引擎配置
+            django.template.backends.gjango.DjangoTemplates
+            django.template.backends.jinja2.Jinja2
+        2.DIRS-模板引擎按列表顺序搜索这些目录以查找模板源文件，绝对路径
+        3.APP_DIRS-决定模板引擎是否应该进入每个已安装的应用中查找模板
+            1.每种模板引擎后端都定义一个惯用的名称作为应用内部存放模板的子目录名称
+                DTL-templates目录
+                jinja2-jinja2目录
+        4.PTIONS-其他选项配置
+    3.同时支持两种模板引擎：
+        1.添加配置模板引擎支持
+            TEMPLATES = [
+                {
+                    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                    'DIRS': [os.path.join(BASE_DIR ,'templates')],
+                }，
+                {
+                    'BACKEND': 'django.template.backends.jinja2,Jinja2',
+                    'DIRS': [os.path.join(BASE_DIR ,'jinja2')],
+                } 
+            ]  
+        2.模板文件查找规则：get_template('detail_html)
+            templates/detail.html 
+            jinja2/detail.html 
+3.模板变量的使用
+    1.渲染python中的变量：
+        1.语法：{{ variable }}
+        2，当模板引擎遇到变量，他将计算这个变量，然后用结果替换掉他本身
+        3.变量名中不能有空格或者标点符号
+        4.例子：渲染静态图片
+            1.土拍你的地址变量
+            2.模板文件中的渲染
+            注意：渲染传递的key称要与html保持一致
+    2.渲染python中的对象：
+        1.语法：{{ object.attribute }}
+        2.dict类型数据的渲染
+            <li>用户：{{ user_info.username }}</li>
+        3.list/tuple类型数据的渲染
+            {{ list_city.0 }}
+        5.list/tuple类型嵌套dict类型数据的渲染
+             <li>{{ prdu_list.0.name }}:{{ prdu_list.0.price }}</li>
+        4.使用bool类型渲染
+4.模板标签的使用
+    1.语法：{% tag %}
+        1.循环控制
+            {% for item in data_list %}
+            <li>内容<li>
+            {% endfor %}
+        2.条件循环
+            {% if condition_a %}
+                满足条件a
+            {% if condition_b %}
+                满足条件b
+            {% else %}
+                都不满足
+            {% endif %}
+        3.其他逻辑控制
+            and,or
+            ==,!=
+            >,<
+            in,not in
+            is
+        4.添加注释
+            {# 注释内容 #}
+            注意：不会渲染在html文件里
+        5.for循环对象
+            {% for key,value in data.items %}
+                {{key}}:{{value}}
+            {% endfor %}
+        6.重复循环
+            {% cycle 'row1' 'row2' %}
+        6.url标签的使用
+            {% url 'url_name' params %}
+            2.防止硬编码带来的不便
+        7.显示当前时间 
+            {% now "jS F Y H:i" %}
+5.模板的过滤器
+    语法：{{ value|filter_name:params }}
+        1.使用过滤器将首字母大写：{{ value|capfirst }}
+        2.日期对象的格式化：{{ value|date:"D d M Y" }}
+        3.默认值显示：  
+            1.{{ value|default:"" }}：默认值为None\flase\空值
+            2.{{ value|default_none:"无" }}：默认值为None
+        4.数字的四舍五入：{{ value|floatformat:4 }}
+        5.富文本内容转移显示：{{ value|safe }}
+        6.字符串截取：
+            1.{{ value|truncatechars:9 }}
+            2.{{ value|truncatechars_html:9 }}
+            3.{{ value|trucatewords:2 }}
+
+6.自定义的过滤器
+    建立步骤：
+        步骤一：在app目录下啊新建包templatetags
+        步骤二 ：实现过滤网ipoll_filter.py
+            from django import template
+            register = template.Library()
+            def warning(value):
+                '''自定义过滤器：将过滤器变红'''
+                if value:
+                    return '<span class="text-red">' +value[0]+ '</span>' + value[1:]
+                return value
+            # 注册过滤器,起名字，将函数名传进来
+            register.filter('warning',warning)
+        步骤三：在模板中使用过滤器：
+            {% load poll_filter %}
+            {{ value|warning }}
+        切记：添加自定义的过滤器后，重启服务器
+7.模板的抽象和继承
+    步骤一：将可变的部分圈出来（base.html）
+        {% block sidebar %}
+            <!-- 菜单栏的内容 -->
+        {% endblock %}
+    步骤二：继承父类
+        {% extends "base.html" %}
+    步骤三：填充新的内容（index.html）
+        {% extends "base.html" %}
+        {% block siderbar %}
+            <!-- 新的菜单栏的内容 -->
+        {% endblock %}
+    步骤四：复用父模板的内容（可选）
+        {% extends "base.html" %}
+        {% block sidebar %}
+            {{ block.super }}
+            <!-- 新的菜单栏的内容-->
+        {% endblock %}
+8.在模板中添加公共部分
+    步骤一：将可变的部分拆出来（footer.html）
+    <footer>
+        这是页脚公共部分
+    </footer>
+    步骤二：将拆分出来的部分包起来（index.html）
+    {% extends "base.html" %}
+    {% block content %}
+        <!-- 页面的主要内容区域 -->
+
+        {# 公共的footer #}
+        {% include "footer.html" %}
+    {% endblock %}
+8.实战
