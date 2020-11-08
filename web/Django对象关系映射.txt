@@ -295,3 +295,9 @@ Django对象关系映射（Object Relational Mpping）
             3.执行sql
             cursor.excute()
             row = cursor.feetchone()
+        3.分页查询
+            1.为sql添加LIMT及OFFSET分页处理
+            2.根据页面参数page生成偏移量
+            3.分装分页器
+            4.返回记录总数
+            5.返回总页数
