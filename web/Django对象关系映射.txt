@@ -324,4 +324,3 @@ Django对象关系映射（Object Relational Mpping）
 18.外键关联优化
     1.QuerySet.swlwct_related()
         1.将外键关联对象查询合并到著查询，一次性查询结果减少sql执行的数量
-        2.
