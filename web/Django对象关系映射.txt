@@ -301,4 +301,27 @@ Django对象关系映射（Object Relational Mpping）
             3.分装分页器
             4.返回记录总数
             5.返回总页数
-        4.
+15.管理器：
+    1.管理器：Manager时Django的模型进行数据库查询操作接口
+    2.每一个模型至少有一个Manager
+    3.Django为每一个模型添加一个名为objects的默认Manager
+    4.自定义管理器：
+        from django.db import models
+        class User(models.Model)
+        #....
+        users = models.Manager()
+16.代理：
+    1.扩充其功能,不会影响到原来的模型
+    class Meta:
+        proxy = Ture
+17.调试及查询优化调优
+    方式1：QuerySet.query属性查看sql语句
+        q = User.objects.all()
+        print(str(q.query))
+    方式2：django-debug-toolbar
+        1.安装：pip install django-debug-toolbar
+        借鉴https://blog.csdn.net/cn_1937/article/details/82715983
+18.外键关联优化
+    1.QuerySet.swlwct_related()
+        1.将外键关联对象查询合并到著查询，一次性查询结果减少sql执行的数量
+        2.
